@@ -190,7 +190,7 @@ public class xacmlExecutor extends PExecutor {
 
 
         byte[][] replies = new byte[commands.length][];
-        ReentrantLock replyLock = new ReentrantLock();
+        // ReentrantLock replyLock = new ReentrantLock();
 
         String[] queries = new String[commands.length];
         for (int i=0; i<commands.length; i++) {
