@@ -1,17 +1,15 @@
-echo "start..."
+echo "######start..."
 
-cd /home/qiwei/xacmlProject/mybftsmart/library
+echo "######downloading library..."
+cd /home/ubuntu/xacmlProject
+rm -rf pdpbtester
+git clone https://github.com/Koll-Stone/pdpbtester.git
 
-./gradlew installDist
-
-cd /home/qiwei/xacmlProject/pdpbtester/pdpbTester
-
-cp /home/qiwei/xacmlProject/mybftsmart/library/build/install/library/lib/BFT-SMaRt.jar lib
-
+echo "######setting environment..."
+cd /home/ubuntu/xacmlProject/pdpbtester
 mvn install:install-file -Dfile=lib/BFT-SMaRt.jar -DgroupId=org.ulisboa -DartifactId=bftsmart -Dpackaging=jar -Dversion=1.0
-
-#mvn dependency:build-classpath -Dmdep.outputFile=runscripts/cpcontent
-#
-#echo ":$(pwd)/target/classes" >> runscripts/cpcontent
+mvn dependency:build-classpath -Dmdep.outputFile=./runscripts/cpcontent
+echo ":$(pwd)/target/classes" >> ./runscripts/cpcontent
+mvn package
 
 echo "finished"
