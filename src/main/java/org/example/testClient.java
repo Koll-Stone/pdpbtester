@@ -98,16 +98,16 @@ public class testClient {
                 value = "a new policy";
                 try {
                     result = update(value);
-                    if (ind%10==0)
+                    if (ind%1000==0)
                         System.out.println("update " + ind + " policy, PDP server return: " + result);
                 } catch (Exception e) {
                     System.err.println("update tx wrong!");
                 }
-                try {
-                    Thread.sleep(10);
-                } catch (Exception e) {
-                    System.out.println("sleep error: "+ e);
-                }
+                // try {
+                //     Thread.sleep(10);
+                // } catch (Exception e) {
+                //     System.out.println("sleep error: "+ e);
+                // }
             }
 
             Storage st = new Storage(numberOfOps / 2);
@@ -165,7 +165,9 @@ public class testClient {
                         amount, totalamount);
                 try {
                     result = validate(kMarketRequest);
-                    System.out.println("["+ZonedDateTime.now() + "] client " + id +  " validate " + ind + " query, PDP server return: " + result);
+                    // System.out.println("["+ZonedDateTime.now() + "] client " + id +  " validate " + ind + " query, PDP server return: " + result);
+                    if (ind%100==0)
+                        System.out.println("client " + id +  " validate " + ind + " query, PDP server return: " + result);
                 } catch (IOException e) {
                     System.err.println("query tx wrong! ioexeception");
                 } catch (ClassNotFoundException e) {
@@ -188,7 +190,9 @@ public class testClient {
                         amount, totalamount);
                 try {
                     result = validate(kMarketRequest);
-                    System.out.println("["+ZonedDateTime.now() + "] client " + id +  " validate " + ind + " query, PDP server return: " + result);
+                    // System.out.println("["+ZonedDateTime.now() + "] client " + id +  " validate " + ind + " query, PDP server return: " + result);
+                    if (ind%100==0)
+                        System.out.println("client " + id +  " validate " + ind + " query, PDP server return: " + result);
                 } catch (IOException e) {
                     System.err.println("query tx wrong! ioexeception");
                 } catch (ClassNotFoundException e) {

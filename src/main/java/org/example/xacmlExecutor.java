@@ -308,7 +308,7 @@ public class xacmlExecutor extends PExecutor {
         }
 
         long duration = System.currentTimeMillis() - start;
-        if (action=="revoke" || newhead-currentPDPHeight>=5) System.out.println("need " + action + " PDP from "+currentPDPHeight+ " to " + newhead +
+        if (action=="revoke" || newhead-currentPDPHeight>=20) System.out.println("need " + action + " PDP from "+currentPDPHeight+ " to " + newhead +
                 ", time costs " + duration + " ms");
 
         currentPDPHeight = newhead;
