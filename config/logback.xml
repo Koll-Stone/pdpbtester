@@ -10,7 +10,7 @@
   <!-- Logging to console wih minimal output -->
   <appender name="MIN-STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern> [%d{HH:mm:ss.SSS}] [%logger{40}.%M\(%line\)] - %msg%n</pattern>
+      <pattern> [%d{mm:ss.SSS}] [%logger{20}.%M\(%line\)] [%-5level] - %msg%n</pattern>
     </encoder>
   </appender>
 

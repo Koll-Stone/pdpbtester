@@ -28,13 +28,4 @@ public class testserver extends POrder {
         new testserver(Integer.parseInt(args[0]));
     }
 
-    @Override
-    public byte[] appExecuteOrdered(byte[] command, MessageContext msgCtx) {
-        return new byte[0];
-    }
-
-    @Override
-    public byte[] appExecuteUnordered(byte[] command, MessageContext msgCtx) {
-        return new byte[0];
-    }
 }

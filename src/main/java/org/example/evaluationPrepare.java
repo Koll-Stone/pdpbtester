@@ -100,7 +100,8 @@ public class evaluationPrepare {
         List<Long> timecost = new ArrayList<Long>();
         Random ran = new Random();
         List<Integer> ResourceIds = new ArrayList<>();
-        int RESOURCENUM= 10;
+        int USERNUM = 20;
+        int RESOURCENUM= 20;
         for (int i=0; i<RESOURCENUM; i++) {
             ResourceIds.add(i);
         }
@@ -112,7 +113,7 @@ public class evaluationPrepare {
 
 //
 
-        for (int i=0; i<1000; i++) {
+        for (int i=0; i<USERNUM*RESOURCENUM; i++) {
             int userid = i/RESOURCENUM;
             Collections.shuffle(ResourceIds);
             String kmarketPolicy = createKMarketPolicy(""+i,"user"+userid, "resource"+ResourceIds.get(0),
@@ -124,6 +125,7 @@ public class evaluationPrepare {
             for (int k=0; k<nWorkers; k++) {
                 newpolicies.get(k).add(testDataBuilder.toDocument(kmarketPolicy));
             }
+//            if (i==10) break;
         }
 
 
@@ -133,7 +135,7 @@ public class evaluationPrepare {
         }
 
         for (int k=0; k<nWorkers; k++) {
-            System.out.println("policy number : " + upfmList[k].showPolicies().size());
+            System.out.println("policy number : " + upfmList[k].showPolicies().size()+"\n");
         }
 
         long start;
@@ -142,28 +144,47 @@ public class evaluationPrepare {
         start = System.nanoTime();
 
 
-
+        System.out.println("----------evaluation starts-----------");
 
         for (int i=0; i<1; i++) {
-            int looptime = 1;
+            int looptime = 10;
             final CountDownLatch latch = new CountDownLatch(looptime);
 
             start = System.nanoTime();
             for (int j=0; j<looptime; j++) {
-                int userid = ran.nextInt(100);
-                userid = 200;
+                int userid = ran.nextInt(USERNUM);
+//                int userid = ran.nextInt(3);
                 int resourceid = ran.nextInt(RESOURCENUM);
-                int amount = ran.nextInt(20);
-                int totalamount = ran.nextInt(1000);
+                int amount = ran.nextInt(10);
+                int totalamount = ran.nextInt(80);
                 String kmarketrequest = createKMarketRequest("user"+userid, "resource"+resourceid,
                         amount, totalamount);
-                System.out.println("request size is: "+kmarketrequest.length());
+//                System.out.println("request size is: "+kmarketrequest.length());
                 parallelVerifier.submit(() -> {
                     int ind = (int) Thread.currentThread().getId() % nWorkers;
-//                    System.out.println("thread id is " + ind);
-                    String res = pdpList[ind].evaluate(kmarketrequest);
-                    System.out.println("response size is: " + res.length());
-                    System.out.println("response is\n"+res);
+
+                    for (int l=0; l<5; l++) {
+                        String res = pdpList[ind].evaluate(kmarketrequest);
+//                    System.out.println("response size is: " + res.length());
+//                    System.out.println("response is\n"+res);
+                        switch (res) {
+                            case "<Response xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\"><Result><Decision>NotApplicable</Decision><Status><StatusCode Value=\"urn:oasis:names:tc:xacml:1.0:status:ok\"/></Status></Result></Response>": {
+                                System.out.println("NotApplicable");
+                                break;
+                            }
+                            case "<Response xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\"><Result><Decision>Permit</Decision><Status><StatusCode Value=\"urn:oasis:names:tc:xacml:1.0:status:ok\"/></Status></Result></Response>": {
+                                System.out.println("Permit");
+                                break;
+                            }
+
+                            case "<Response xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\"><Result><Decision>Deny</Decision><Status><StatusCode Value=\"urn:oasis:names:tc:xacml:1.0:status:ok\"/></Status></Result></Response>": {
+                                System.out.println("Deny");
+                                break;
+                            }
+                            default:
+                                System.out.println("wired thing, res =\n"+res);
+                        }
+                    }
                     latch.countDown();
                 });
             }
@@ -175,7 +196,11 @@ public class evaluationPrepare {
 
             elapsedTime = (System.nanoTime() - start)/1000000;
             timecost.add(elapsedTime);
+
+            System.out.println("----------evaluation end-----------");
             System.out.println("PDP evaluation 1000 requests costs " + (elapsedTime) + " ms");
+
+
 
 //            System.out.println("\n======================== XACML Request ===================");
 //            System.out.println(kmarketrequest);
@@ -240,14 +265,6 @@ public class evaluationPrepare {
                 "            <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#integer\">100</AttributeValue>\n" +
                 "         </Apply>\n" +
                 "      </Condition>\n" +
-                "    <AdviceExpressions>\n" +
-                "    <AdviceExpression AdviceId=\"deny-liquor-medicine-advice\" AppliesTo=\"Deny\">\n" +
-                "    <AttributeAssignmentExpression AttributeId=\"urn:oasis:names:tc:xacml:2.0:example:attribute:text\">\n" +
-                "\t<AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">You are not allowed to do more than $100 purchase\n" +
-                "    from KMarket on-line trading system</AttributeValue>\n" +
-                "\t</AttributeAssignmentExpression>\n" +
-                "    </AdviceExpression>\n" +
-                "    </AdviceExpressions>\n" +
                 "   </Rule>\n" +
                 "   <Rule Effect=\"Deny\" RuleId=\"deny-liquor-medicine\">\n" +
                 "   <Target>\n" +
@@ -266,14 +283,6 @@ public class evaluationPrepare {
                 "         </AllOf>\n" +
                 "      </AnyOf>\n" +
                 "   </Target>\n" +
-                "  <AdviceExpressions>\n" +
-                "    <AdviceExpression AdviceId=\"deny-liquor-medicine-advice\" AppliesTo=\"Deny\">\n" +
-                "    <AttributeAssignmentExpression AttributeId=\"urn:oasis:names:tc:xacml:2.0:example:attribute:text\">\n" +
-                "\t<AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">You are not allowed to buy Liquor or Medicine\n" +
-                "    from KMarket on-line trading system</AttributeValue>\n" +
-                "\t</AttributeAssignmentExpression>\n" +
-                "    </AdviceExpression>\n" +
-                "    </AdviceExpressions>\n" +
                 "   </Rule>\n" +
                 "   <Rule Effect=\"Deny\" RuleId=\"max-drink-amount\">\n" +
                 "   <Target>\n" +
@@ -294,14 +303,6 @@ public class evaluationPrepare {
                 "            <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#integer\">10</AttributeValue>\n" +
                 "         </Apply>\n" +
                 "      </Condition>\n" +
-                "    <AdviceExpressions>\n" +
-                "    <AdviceExpression AdviceId=\"max-drink-amount-advice\" AppliesTo=\"Deny\">\n" +
-                "    <AttributeAssignmentExpression AttributeId=\"urn:oasis:names:tc:xacml:2.0:example:attribute:text\">\n" +
-                "\t<AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">You are not allowed to buy more tha 10 Drinks\n" +
-                "    from KMarket on-line trading system</AttributeValue>\n" +
-                "\t</AttributeAssignmentExpression>\n" +
-                "    </AdviceExpression>\n" +
-                "    </AdviceExpressions>\n" +
                 "   </Rule>\n" +
                 "    <Rule RuleId=\"permit-rule\" Effect=\"Permit\"/>    \n" +
                 "</Policy>";

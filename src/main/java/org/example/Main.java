@@ -2,13 +2,23 @@ package org.example;
 
 import org.wso2.balana.Balana;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
 
         System.out.println("Hello world!");
 
-        demoClass dc = new demoClass();
-        dc.outLog();
+        List<Integer> xlist = new ArrayList<Integer>();
+        xlist.add(1);
+        xlist.add(2);
+        xlist.add(3);
+        for (Integer x: xlist) {
+            xlist.remove(x);
+            System.out.println(x + "has been removed");
+        }
+        System.out.println("-------\n final list is" + xlist);
     }
 }
 
