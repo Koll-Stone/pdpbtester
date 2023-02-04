@@ -1,9 +1,10 @@
 echo "######start..."
 
 echo "######downloading bft smart..."
-cd /home/ubuntu/xacmlProject
-rm -rf storage
-git clone https://github.com/Koll-Stone/storage.git
+cd /home/ubuntu/xacmlProject/storage
+git pull
+# rm -rf storage
+# git clone https://github.com/Koll-Stone/storage.git
 
 echo "######compile bftsmart to maven..."
 cp /home/ubuntu/xacmlProject/storage/BFT-SMaRt.jar /home/ubuntu/xacmlProject/pdpbtester/lib
