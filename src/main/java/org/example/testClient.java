@@ -130,7 +130,7 @@ public class testClient {
                 //     ex.printStackTrace();
                 // }
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(400);
                 } catch (Exception e) {
                     System.out.println("sleep error: "+ e);
                 }
