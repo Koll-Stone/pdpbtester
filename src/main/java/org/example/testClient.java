@@ -94,27 +94,27 @@ public class testClient {
             String value;
             String result;
 
-            for (; ind<numberOfOps/2; ind++) {
-                value = "a new policy";
-                try {
-                    result = update(value);
-                    if (ind%1000==0)
-                        System.out.println("update " + ind + " policy, PDP server return: " + result);
-                } catch (Exception e) {
-                    System.err.println("update tx wrong!");
-                }
-                // try {
-                //     Thread.sleep(10);
-                // } catch (Exception e) {
-                //     System.out.println("sleep error: "+ e);
-                // }
-            }
+            // for (; ind<numberOfOps/2; ind++) {
+            //     value = "a new policy";
+            //     try {
+            //         result = update(value);
+            //         if (ind%1000==0)
+            //             System.out.println("update " + ind + " policy, PDP server return: " + result);
+            //     } catch (Exception e) {
+            //         System.err.println("update tx wrong!");
+            //     }
+            //     // try {
+            //     //     Thread.sleep(10);
+            //     // } catch (Exception e) {
+            //     //     System.out.println("sleep error: "+ e);
+            //     // }
+            // }
 
-            Storage st = new Storage(numberOfOps / 2);
+            // Storage st = new Storage(numberOfOps / 2);
             System.out.println("start measuring...");
 
             for (; ind<numberOfOps; ind++) {
-                long last_send_instant = System.nanoTime();
+                // long last_send_instant = System.nanoTime();
                 value = "a new policy";
                 try {
                     result = update(value);
@@ -123,27 +123,27 @@ public class testClient {
                 } catch (Exception e) {
                     System.err.println("update tx wrong!");
                 }
-                long latency = System.nanoTime() - last_send_instant;
-                try {
-                    latencies.put(id + "\t" + System.currentTimeMillis() + "\t" + latency + "\n");
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
+                // long latency = System.nanoTime() - last_send_instant;
                 // try {
-                //     Thread.sleep(10);
-                // } catch (Exception e) {
-                //     System.out.println("sleep error: "+ e);
+                //     latencies.put(id + "\t" + System.currentTimeMillis() + "\t" + latency + "\n");
+                // } catch (InterruptedException ex) {
+                //     ex.printStackTrace();
                 // }
+                try {
+                    Thread.sleep(500);
+                } catch (Exception e) {
+                    System.out.println("sleep error: "+ e);
+                }
 
-                st.store(latency);
+                // st.store(latency);
             }
-            if(id == initId) {
-                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (-10%) = " + st.getAverage(true) / 1000 + " us ");
-                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (-10%) = " + st.getDP(true) / 1000 + " us ");
-                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (all samples) = " + st.getAverage(false) / 1000 + " us ");
-                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (all samples) = " + st.getDP(false) / 1000 + " us ");
-                System.out.println(this.id + " // Maximum time for " + numberOfOps / 2 + " executions (all samples) = " + st.getMax(false) / 1000 + " us ");
-            }
+            // if(id == initId) {
+            //     System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (-10%) = " + st.getAverage(true) / 1000 + " us ");
+            //     System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (-10%) = " + st.getDP(true) / 1000 + " us ");
+            //     System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (all samples) = " + st.getAverage(false) / 1000 + " us ");
+            //     System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (all samples) = " + st.getDP(false) / 1000 + " us ");
+            //     System.out.println(this.id + " // Maximum time for " + numberOfOps / 2 + " executions (all samples) = " + st.getMax(false) / 1000 + " us ");
+            // }
             System.out.println("test client " + id + ": all "+ numberOfOps + " query txs has been sent, end...");
 
 
