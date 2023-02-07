@@ -33,7 +33,7 @@ import java.util.List;
 public class testDataBuilder {
 
 
-    public static int USERNUM = 600;
+    public static int USERNUM = 1000;
     public static int RESOURCENUM= 20;
 
     public static int POLICYEACHUSER = 1;
