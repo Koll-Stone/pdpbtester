@@ -17,7 +17,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReentrantLock;
+// import java.util.concurrent.locks.ReentrantLock;
 
 import static org.example.testDataBuilder.*;
 
@@ -36,7 +36,7 @@ public class xacmlExecutor extends PExecutor {
 
     public POrder porder;
 
-    public List<Document> initialPolicies = new ArrayList<Document>();
+    public List<Document> checkpointheightPolicies = new ArrayList<Document>();
     private Set<Integer> initialIds = new HashSet<Integer>();
     private Map<Integer, String> allPolicies = new HashMap<>();
     private Map<Integer, Set<Integer>> positiveUpdates = new HashMap<Integer, Set<Integer>>();
@@ -70,7 +70,7 @@ public class xacmlExecutor extends PExecutor {
                 String kmarketPolicy = testDataBuilder.createKMarketPolicy(""+policyIndex,"user"+i, "resource"+a1,
                         "resource"+a2, "resource"+a3);
                 initialIds.add(policyIndex);
-                initialPolicies.add(testDataBuilder.toDocument(kmarketPolicy));
+                checkpointheightPolicies.add(testDataBuilder.toDocument(kmarketPolicy));
                 allPolicies.put(policyIndex, kmarketPolicy);
             }
         }
@@ -241,7 +241,22 @@ public class xacmlExecutor extends PExecutor {
         return replies;
     }
 
-    public void garbageCollect() {
+    
+    @Override
+    public byte[] getSnapShot() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+        for (Document policy: checkpointheightPolicies) {
+            try {
+                outputStream.write(policy.toString().getBytes());
+            } catch (IOException e) {
+                System.out.println("write state log wrong " + e);
+            }
+        }
+        return outputStream.toByteArray();
+    }
+
+    @Override
+    public void executorstateGC() {
 
     }
 
@@ -278,7 +293,7 @@ public class xacmlExecutor extends PExecutor {
         set1.add(upfmList[ind]);
         balana.getPdpConfig().getPolicyFinder().setModules(set1);
         PDP pdp = new PDP(new PDPConfig(null, balana.getPdpConfig().getPolicyFinder(), null, true));
-        upfmList[ind].loadPolicyBatchFromMemory(initialPolicies);
+        upfmList[ind].loadPolicyBatchFromMemory(checkpointheightPolicies);
         return pdp;
     }
 
@@ -313,5 +328,7 @@ public class xacmlExecutor extends PExecutor {
         currentPDPHeight = newhead;
 
     }
+
+
 
 }
