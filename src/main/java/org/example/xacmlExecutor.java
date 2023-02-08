@@ -1,6 +1,5 @@
 package org.example;
 
-import bftsmart.demo.microbenchmarks.ThroughputLatencyClient;
 import bftsmart.tom.server.PDPB.PExecutor;
 import bftsmart.tom.server.PDPB.POrder;
 import org.w3c.dom.Document;

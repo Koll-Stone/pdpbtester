@@ -84,7 +84,7 @@ public class testClient {
         boolean signed;
         int numberOfOps;
 
-        int displayInterval=100;
+        int displayInterval=10;
 
         ServiceProxy clientProxy;
 
