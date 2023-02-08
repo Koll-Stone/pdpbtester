@@ -241,7 +241,7 @@ public class xacmlExecutor extends PExecutor {
                 int tind = (int) Thread.currentThread().getId() % nWorkers;
                 String result = pdpList[tind].evaluate(new String(queries[queryind])); // thread safe?
                 replies[queryind] = result.getBytes();
-                System.out.println("thread " + tind + " finished validating 1 request, the result is: " + shortise(result));
+                // System.out.println("thread " + tind + " finished validating 1 request, the result is: " + shortise(result));
 
                 // verify signature
                 if (this.signed) {
@@ -254,7 +254,7 @@ public class xacmlExecutor extends PExecutor {
                             System.out.println("Client sent invalid signature!");
                             System.exit(0);
                         } else {
-                            System.out.println("thread " + tind + " finished validating 1 request sig, ok");
+                            // System.out.println("thread " + tind + " finished validating 1 request sig, ok");
                         }
                     } catch (Exception e) {
                         System.out.println("error in validating query " + e);

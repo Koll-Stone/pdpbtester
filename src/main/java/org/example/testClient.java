@@ -84,7 +84,7 @@ public class testClient {
         boolean signed;
         int numberOfOps;
 
-        int displayInterval=1;
+        int displayInterval=100;
 
         ServiceProxy clientProxy;
 
@@ -263,7 +263,7 @@ public class testClient {
                     ecdsaSign.initSign(privateKey);
                     ecdsaSign.update(request);
                     signature = ecdsaSign.sign();
-                    System.out.println("sign succeed");
+                    // System.out.println("sign succeed");
                 } catch (Exception e) {
                     System.out.println("wrong in signing messages... "+e);
                 }
