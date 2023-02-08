@@ -25,7 +25,7 @@ done < $input
 
 if [ $flag -eq 1 ]
 then
-    echo "bash runscripts/myrun.sh org.example.testserver $me"
-    bash runscripts/myrun.sh org.example.testserver $me
+    echo "bash runscripts/myrun.sh org.example.testserver $me true"
+    bash runscripts/myrun.sh org.example.testserver $me true
 fi
 
