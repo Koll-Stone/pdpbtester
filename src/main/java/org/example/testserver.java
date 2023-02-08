@@ -1,12 +1,12 @@
 package org.example;
 
-// import bftsmart.tom.MessageContext;
+import bftsmart.tom.MessageContext;
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.PDPB.POrder;
 
 public class testserver extends POrder {
-    public testserver(int id) {
-        xacmlExecutor xexecutor = new xacmlExecutor();
+    public testserver(int id, boolean signed) {
+        xacmlExecutor xexecutor = new xacmlExecutor(signed);
 
         System.out.println("created xacml executor");
 
@@ -25,7 +25,7 @@ public class testserver extends POrder {
     }
 
     public static void main(String[] args) {
-        new testserver(Integer.parseInt(args[0]));
+        new testserver(Integer.parseInt(args[0]), Boolean.parseBoolean(args[1]));
     }
 
 }

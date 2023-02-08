@@ -1,5 +1,6 @@
 package org.example;
 
+import bftsmart.demo.microbenchmarks.ThroughputLatencyClient;
 import bftsmart.tom.server.PDPB.PExecutor;
 import bftsmart.tom.server.PDPB.POrder;
 import org.w3c.dom.Document;
@@ -13,18 +14,25 @@ import org.wso2.balana.finder.impl.updatablePolicyFinderModule;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.security.*;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-// import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import static org.example.testClient.pubKey;
 import static org.example.testDataBuilder.*;
 
 
 public class xacmlExecutor extends PExecutor {
 
     // todo, i can't use logger in this file, logger has no output to the console
+    boolean signed;
     private static Balana[] balanaList;
     private static PDP[] pdpList;
     private updatablePolicyFinderModule[] upfmList;
@@ -44,9 +52,22 @@ public class xacmlExecutor extends PExecutor {
 
     private int currentPDPHeight;
 
-    public xacmlExecutor() {
+    PublicKey publicKey=null;
+
+    public xacmlExecutor(boolean signed) {
         System.out.println("initialize xacmlExecutor");
         initProperty();
+
+        this.signed = signed;
+        byte[] byte_pubkey = Base64.getDecoder().decode(pubKey);
+        try {
+            KeyFactory factory = KeyFactory.getInstance("ECDSA", "BC");
+            publicKey = (ECPublicKey) factory.generatePublic(new X509EncodedKeySpec(byte_pubkey));
+        } catch (Exception e) {
+
+        }
+
+
 
         balanaList = new Balana[nWorkers];
         pdpList = new PDP[nWorkers];
@@ -149,15 +170,14 @@ public class xacmlExecutor extends PExecutor {
     }
 
     /*
-    hs: hieghts
+    newhead: hieght
     commands: xacml queries
      */
 
     @Override
     public byte[][] executeOpInParallel(int newhead, byte[][] commands) {
 
-        // check all dependency exists
-        // todo, change pdp to the height
+
         Set<Integer> IdtoAdd = new HashSet<Integer>();
         Set<Integer> IdtoDelete = new HashSet<Integer>();
         if (currentPDPHeight<newhead) {
@@ -190,24 +210,25 @@ public class xacmlExecutor extends PExecutor {
 
 
         byte[][] replies = new byte[commands.length][];
-        // ReentrantLock replyLock = new ReentrantLock();
+        ReentrantLock replyLock = new ReentrantLock();
 
-        String[] queries = new String[commands.length];
+
+        byte[][] queries = new byte[commands.length][];
+        byte[][] signatures = new byte[commands.length][];
         for (int i=0; i<commands.length; i++) {
             byte[] tx = commands[i];
-//            if (tx==null) System.out.println("wrong!!! null tx!!");
-            try (ByteArrayInputStream byteIn = new ByteArrayInputStream(tx);
-                 ObjectInput objIn = new ObjectInputStream(byteIn);
-                 ByteArrayOutputStream byteOut = new ByteArrayOutputStream();) {
-                int op = objIn.readInt();
-                if (op==10) { // it is indeed a query sent from pep clients
-                    String content = (String)objIn.readObject();
-                    queries[i] = content;
-                } else {
-                    System.out.println("****wrong**** it should be a query!");
-                }
-            } catch (IOException | ClassNotFoundException e) {
-                System.out.println(e + "Ocurred during PDPB Executor operation");
+            ByteBuffer buffer = ByteBuffer.wrap(tx);
+            int op = buffer.getInt();
+            if (op==10) {
+                int l = buffer.getInt();
+                byte[] content = new byte[l];
+                buffer.get(content);
+                queries[i] = content;
+                l = buffer.getInt();
+                signatures[i] = new byte[l];
+                buffer.get(signatures[i]);
+            } else {
+                System.out.println("****wrong**** it should be a query!");
             }
         }
 
@@ -216,18 +237,30 @@ public class xacmlExecutor extends PExecutor {
         for (int i=0; i<commands.length; i++) {
             final int queryind = i;
             parallelVerifier.submit(() -> {
-                try {
-                    int tind = (int) Thread.currentThread().getId() % nWorkers;
-                    String result = pdpList[tind].evaluate(queries[queryind]); // thread safe?
-//                    replyLock.lock();
-                    replies[queryind] = result.getBytes();
-//                    replyLock.unlock();
-//                    System.out.println("thread " + tind + " finished validating 1 request, the result is: "
-//                    + shortise(result));
+                // validate access request
+                int tind = (int) Thread.currentThread().getId() % nWorkers;
+                String result = pdpList[tind].evaluate(new String(queries[queryind])); // thread safe?
+                replies[queryind] = result.getBytes();
+                System.out.println("thread " + tind + " finished validating 1 request, the result is: " + shortise(result));
+
+                // verify signature
+                if (this.signed) {
+                    try {
+                        Signature ecdsaVerify = Signature.getInstance("SHA256withECDSA",
+                                "BC");
+                        ecdsaVerify.initVerify(publicKey);
+                        ecdsaVerify.update(queries[queryind]);
+                        if (!ecdsaVerify.verify(signatures[queryind])) {
+                            System.out.println("Client sent invalid signature!");
+                            System.exit(0);
+                        } else {
+                            System.out.println("thread " + tind + " finished validating 1 request sig, ok");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("error in validating query " + e);
+                    }
                 }
-                catch (Exception e) {
-                    System.out.println("error in validating query");
-                }
+
 
                 latch.countDown();
             });
@@ -241,7 +274,6 @@ public class xacmlExecutor extends PExecutor {
         return replies;
     }
 
-    
     @Override
     public byte[] getSnapShot() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
@@ -274,17 +306,17 @@ public class xacmlExecutor extends PExecutor {
         }
     }
 
-    static class task implements Runnable {
-        int taskId;
-
-        public task(int i) {
-            taskId = i;
-        }
-
-        public void run() {
-
-        }
-    }
+//    static class task implements Runnable {
+//        int taskId;
+//
+//        public task(int i) {
+//            taskId = i;
+//        }
+//
+//        public void run() {
+//
+//        }
+//    }
 
     public PDP createThePDP(int ind) {
         System.out.println("craete the pdp");
@@ -322,13 +354,12 @@ public class xacmlExecutor extends PExecutor {
             }
         }
 
-        // long duration = System.currentTimeMillis() - start;
-        // if (action=="revoke" || newhead-currentPDPHeight>=20) System.out.println("need " + action + " PDP from "+currentPDPHeight+ " to " + newhead +", time costs " + duration + " ms");
+//        long duration = System.currentTimeMillis() - start;
+//        if (action=="revoke" || newhead-currentPDPHeight>=5) System.out.println("need " + action + " PDP from "+currentPDPHeight+ " to " + newhead +
+//                ", time costs " + duration + " ms");
 
         currentPDPHeight = newhead;
 
     }
-
-
 
 }
