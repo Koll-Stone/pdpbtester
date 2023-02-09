@@ -118,8 +118,8 @@ public class testClient {
                 value = "a new policy";
                 try {
                     result = update(value);
-//                    if (ind%displayInterval==0)
-                    System.out.println( ZonedDateTime.now()+ "update " + ind + " policy, PDP server return: " + result);
+                    if (ind%displayInterval==0)
+                        System.out.println( ZonedDateTime.now()+ "update " + ind + " policy, PDP server return: " + result);
                 } catch (Exception e) {
                     System.err.println("update tx wrong!");
                 }
@@ -129,16 +129,8 @@ public class testClient {
                     System.out.println("sleep error: "+ e);
                 }
 
-//                st.store(latency);
             }
-//            if(id == initId) {
-//                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (-10%) = " + st.getAverage(true) / 1000 + " us ");
-//                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (-10%) = " + st.getDP(true) / 1000 + " us ");
-//                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (all samples) = " + st.getAverage(false) / 1000 + " us ");
-//                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (all samples) = " + st.getDP(false) / 1000 + " us ");
-//                System.out.println(this.id + " // Maximum time for " + numberOfOps / 2 + " executions (all samples) = " + st.getMax(false) / 1000 + " us ");
-//            }
-//            System.out.println("test client " + id + ": all "+ numberOfOps + " query txs has been sent, end...");
+
 
 
         }
