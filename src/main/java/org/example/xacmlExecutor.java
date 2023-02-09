@@ -1,7 +1,9 @@
 package org.example;
 
+import bftsmart.tom.ReplicaContext;
 import bftsmart.tom.server.PDPB.PExecutor;
 import bftsmart.tom.server.PDPB.POrder;
+import bftsmart.tom.util.TOMUtil;
 import org.w3c.dom.Document;
 import org.wso2.balana.Balana;
 import org.wso2.balana.PDP;
@@ -24,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.example.testClient.pubKey;
 import static org.example.testDataBuilder.*;
 
 
@@ -32,6 +33,8 @@ public class xacmlExecutor extends PExecutor {
 
     // todo, i can't use logger in this file, logger has no output to the console
     boolean signed;
+    ReplicaContext replicaContext;
+
     private static Balana[] balanaList;
     private static PDP[] pdpList;
     private updatablePolicyFinderModule[] upfmList;
@@ -58,13 +61,13 @@ public class xacmlExecutor extends PExecutor {
         initProperty();
 
         this.signed = signed;
-        byte[] byte_pubkey = Base64.getDecoder().decode(pubKey);
-        try {
-            KeyFactory factory = KeyFactory.getInstance("ECDSA", "BC");
-            publicKey = (ECPublicKey) factory.generatePublic(new X509EncodedKeySpec(byte_pubkey));
-        } catch (Exception e) {
-
-        }
+//        byte[] byte_pubkey = Base64.getDecoder().decode(pubKey);
+//        try {
+//            KeyFactory factory = KeyFactory.getInstance("ECDSA", "BC");
+//            publicKey = (ECPublicKey) factory.generatePublic(new X509EncodedKeySpec(byte_pubkey));
+//        } catch (Exception e) {
+//
+//        }
 
 
 
@@ -99,6 +102,8 @@ public class xacmlExecutor extends PExecutor {
 
         System.out.println("xacmlExecutor initiazlize property successfully");
     }
+
+    public void setReplicaContext(ReplicaContext replicaContext) {this.replicaContext  = replicaContext;}
 
     public void setPOrder(POrder pe) {
         porder = pe;
@@ -240,20 +245,19 @@ public class xacmlExecutor extends PExecutor {
                 int tind = (int) Thread.currentThread().getId() % nWorkers;
                 String result = pdpList[tind].evaluate(new String(queries[queryind])); // thread safe?
                 replies[queryind] = result.getBytes();
-                // System.out.println("thread " + tind + " finished validating 1 request, the result is: " + shortise(result));
+                System.out.println("thread " + tind + " finished validating 1 request, the result is: " + shortise(result));
 
                 // verify signature
                 if (this.signed) {
                     try {
-                        Signature ecdsaVerify = Signature.getInstance("SHA256withECDSA",
-                                "BC");
-                        ecdsaVerify.initVerify(publicKey);
+                        Signature ecdsaVerify = TOMUtil.getSigEngine();
+                        ecdsaVerify.initVerify(replicaContext.getStaticConfiguration().getPublicKey());
                         ecdsaVerify.update(queries[queryind]);
                         if (!ecdsaVerify.verify(signatures[queryind])) {
                             System.out.println("Client sent invalid signature!");
                             System.exit(0);
                         } else {
-                            // System.out.println("thread " + tind + " finished validating 1 request sig, ok");
+                            System.out.println("thread " + tind + " finished validating 1 request sig which is valid");
                         }
                     } catch (Exception e) {
                         System.out.println("error in validating query " + e);

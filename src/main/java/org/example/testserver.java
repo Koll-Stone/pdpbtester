@@ -1,6 +1,6 @@
 package org.example;
 
-import bftsmart.tom.MessageContext;
+
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.PDPB.POrder;
 
@@ -15,6 +15,8 @@ public class testserver extends POrder {
         xexecutor.setPOrder(this);
 
         ServiceReplica sr = new ServiceReplica(id, this, this);
+        xexecutor.setReplicaContext(sr.getReplicaContext());
+        
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {

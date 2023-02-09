@@ -2,12 +2,11 @@ package org.example;
 
 import bftsmart.tom.ServiceProxy;
 import bftsmart.tom.util.Storage;
+import bftsmart.tom.util.TOMUtil;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.security.*;
-import java.security.interfaces.ECPrivateKey;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -23,8 +22,8 @@ import java.security.Signature;
 import static org.example.testDataBuilder.*;
 
 public class testClient {
-    public static String privKey = "MIIBCQIBADAQBgcqhkjOPQIBBgUrgQQAJwSB8TCB7gIBAQRIAtb36T0mYWP0qAc0mxWB5a9MUfeioE+YEBWEBf/kZNaa6iCochsvEZ2lOcGH53vn21A3yDf19MaeKrfDnGALwXpIe95w9O10oAcGBSuBBAAnoYGVA4GSAAQDvpR29e6TyJm9Rjiqaowm9k7WCcaPFWqnrEr7jflCtSa2ega4TiUWcFCBywKv5fwgEw1jLNGPOew6BFHAojcshSEJEIPbrtEGT1BDJlai8oh/RCMzFKCa/tp+uLMmY8cWGj6yfc4A+maA5GSKXH5UHfRNr+m3Za8jAs3cF4hneD/l+WWRelP5fll+1HUfX6I=";
-    public static String pubKey = "MIGnMBAGByqGSM49AgEGBSuBBAAnA4GSAAQDvpR29e6TyJm9Rjiqaowm9k7WCcaPFWqnrEr7jflCtSa2ega4TiUWcFCBywKv5fwgEw1jLNGPOew6BFHAojcshSEJEIPbrtEGT1BDJlai8oh/RCMzFKCa/tp+uLMmY8cWGj6yfc4A+maA5GSKXH5UHfRNr+m3Za8jAs3cF4hneD/l+WWRelP5fll+1HUfX6I=";
+
+
 
     private static int initId;
     private static LinkedBlockingQueue<String> latencies;
@@ -84,7 +83,7 @@ public class testClient {
         boolean signed;
         int numberOfOps;
 
-        int displayInterval=10;
+        int displayInterval=1;
 
         ServiceProxy clientProxy;
 
@@ -150,13 +149,13 @@ public class testClient {
 
 
 
-            byte[] byte_prvkey = Base64.getDecoder().decode(privKey);
-            try {
-                KeyFactory factory = KeyFactory.getInstance("ECDSA", "BC");
-                privateKey = (ECPrivateKey) factory.generatePrivate(new PKCS8EncodedKeySpec(byte_prvkey));
-            } catch (Exception e) {
-
-            }
+//            byte[] byte_prvkey = Base64.getDecoder().decode(privKey);
+//            try {
+//                KeyFactory factory = KeyFactory.getInstance("EC");
+//                privateKey = (ECPrivateKey) factory.generatePrivate(new PKCS8EncodedKeySpec(byte_prvkey));
+//            } catch (Exception e) {
+//
+//            }
 
 
 
@@ -248,22 +247,16 @@ public class testClient {
 
         public String validate(String content) throws IOException, ClassNotFoundException {
 
-//            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-//            ObjectOutput objOut = new ObjectOutputStream(byteOut);
-//            objOut.writeInt(10);
-//            objOut.writeObject(content);
-//            objOut.flush();
-//            byteOut.flush();
 
             byte[] request = content.getBytes();
             byte[] signature = new byte[0];
             if (this.signed) {
                 try {
-                    Signature ecdsaSign = Signature.getInstance("SHA256withECDSA", "BC");
-                    ecdsaSign.initSign(privateKey);
+                    Signature ecdsaSign = TOMUtil.getSigEngine();
+                    ecdsaSign.initSign(clientProxy.getViewManager().getStaticConf().getPrivateKey());
                     ecdsaSign.update(request);
                     signature = ecdsaSign.sign();
-                    // System.out.println("sign succeed");
+                    System.out.println("sign succeed, signature length is "+signature.length+" bytes");
                 } catch (Exception e) {
                     System.out.println("wrong in signing messages... "+e);
                 }
