@@ -36,8 +36,9 @@ public class testClient {
         latencies = new LinkedBlockingQueue<String>();
         int cmd = Integer.parseInt(args[1]);
         int threadNum = Integer.parseInt(args[2]);
-        int ite = Integer.parseInt(args[3]);
-        boolean signed = Boolean.parseBoolean(args[4]);
+        int interval = Integer.parseInt(args[3]);
+        int ite = Integer.parseInt(args[4]);
+        boolean signed = Boolean.parseBoolean(args[5]);
 
         RunnableTestClient[] rtclients = new RunnableTestClient[threadNum];
         for (int i=0; i<threadNum; i++) {
@@ -47,7 +48,7 @@ public class testClient {
 //                ex.printStackTrace();
 //            }
             System.out.println("Launching runnable newclient " + (initId+i));
-            rtclients[i] = new RunnableTestClient(initId+i, cmd, ite, signed);
+            rtclients[i] = new RunnableTestClient(initId+i, cmd, interval, ite, signed);
         }
 
 
