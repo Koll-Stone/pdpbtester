@@ -83,15 +83,16 @@ public class testClient {
         boolean signed;
         int numberOfOps;
 
-        int displayInterval=1;
+        int displayInterval;
 
         ServiceProxy clientProxy;
 
-        public RunnableTestClient(int id, int cmd, int numberOfOps, boolean signed) {
+        public RunnableTestClient(int id, int cmd, int interval, int numberOfOps, boolean signed) {
             this.id = id;
             this.cmd = cmd;
             this.numberOfOps = numberOfOps;
             this.signed = signed;
+            this.displayInterval = interval;
             clientProxy = new ServiceProxy(id);
 //            System.out.println("timeout value is " + clientProxy.getInvokeTimeout());
         }
@@ -256,7 +257,7 @@ public class testClient {
                     ecdsaSign.initSign(clientProxy.getViewManager().getStaticConf().getPrivateKey());
                     ecdsaSign.update(request);
                     signature = ecdsaSign.sign();
-                    System.out.println("sign succeed, signature length is "+signature.length+" bytes");
+                    // System.out.println("sign succeed, signature length is "+signature.length+" bytes");
                 } catch (Exception e) {
                     System.out.println("wrong in signing messages... "+e);
                 }
