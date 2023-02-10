@@ -329,7 +329,7 @@ public class xacmlExecutor extends PExecutor {
         balana.getPdpConfig().getPolicyFinder().setModules(set1);
         PDP pdp = new PDP(new PDPConfig(null, balana.getPdpConfig().getPolicyFinder(), null, true));
         upfmList[ind].loadPolicyBatchFromMemory(checkpointheightPolicies);
-        System.out.println("PDP "+ind+" has "+upfmList[ind].showPolicies()+" policies");
+        System.out.println("PDP "+ind+" has "+upfmList[ind].showPolicies().size()+" policies");
         return pdp;
     }
 
