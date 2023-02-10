@@ -70,12 +70,12 @@ public class xacmlExecutor extends PExecutor {
 //        }
 
 
-
         balanaList = new Balana[nWorkers];
         pdpList = new PDP[nWorkers];
         upfmList = new updatablePolicyFinderModule[nWorkers];
         for (int i=0; i<nWorkers; i++) upfmList[i] = new updatablePolicyFinderModule();
         currentPDPHeight = 0;
+
 
         List<Integer> ResourceIds = new ArrayList<>();
         for (int i=0; i<RESOURCENUM; i++) {
