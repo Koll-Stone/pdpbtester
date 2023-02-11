@@ -31,9 +31,9 @@ then
         bash runscripts/myrun.sh org.example.testserver $me true
     else
         client=$(($me-4))
-        start=$(($(($client*400))+1001))
-        echo "bash runscripts/myrun.sh org.example.testClient $start 2 200 100 800 true"
-        bash runscripts/myrun.sh org.example.testClient $start 2 300 100 400 true
+        start=$(($(($client*600))+1001))
+        echo "bash runscripts/myrun.sh org.example.testClient $start 2 300 100 400 true"
+        bash runscripts/myrun.sh org.example.testClient $start 2 500 100 210 true
     fi   
 fi
 
