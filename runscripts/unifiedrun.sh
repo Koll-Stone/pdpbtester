@@ -27,12 +27,13 @@ if [ $flag -eq 1 ]
 then
     if [ $me -le 3 ]
     then
-        echo "bash runscripts/myrun.sh org.example.testserver $me true"
-        bash runscripts/myrun.sh org.example.testserver $me true
+        command="runscripts/myrun.sh org.example.testserver $me true"
+        echo $command
+        bash $command
     else
         client=$(($me-4))
         start=$(($(($client*600))+1001))
-        command="runscripts/myrun.sh org.example.testClient $start 2 40 20 2501 true"
+        command="runscripts/myrun.sh org.example.testClient $start 2 100 20 1201 true"
         echo $command
         bash $command
     fi   
