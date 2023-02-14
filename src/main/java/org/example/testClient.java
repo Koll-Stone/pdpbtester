@@ -53,8 +53,8 @@ public class testClient {
 //            } catch (InterruptedException ex) {
 //                ex.printStackTrace();
 //            }
-            System.out.println("Launching runnable newclient " + (initId+1000+i));
-            rtclients[i] = new RunnableTestClient(initId+1000+i, ite, signed, intv);
+            System.out.println("Launching runnable newclient " + (initId*1000+i));
+            rtclients[i] = new RunnableTestClient(initId*1000+i, ite, signed, intv);
             if (i==0) {
                 rtclients[i].setLinkedPAP(rtpapclient);
             }
