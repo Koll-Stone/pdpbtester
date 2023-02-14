@@ -148,7 +148,7 @@ public class testClient {
                 value = "a new policy";
                 try {
                     result = update(value);
-                    System.out.println("client"+ id + "update " + ind + " policy, PDP server return: " + result);
+                    System.out.println("client "+ id + " update " + ind + " policy, PDP server return: " + result);
                 } catch (Exception e) {
                     System.err.println("update tx wrong!");
                 }
