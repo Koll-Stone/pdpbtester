@@ -33,9 +33,9 @@ then
     else
         client=$(($me-4))
         # start=$(($(($client*600))+1001))
-        command="runscripts/myrun.sh org.example.testClient $client 20 301 true 10"
+        command="runscripts/myrun.sh org.example.testClient $client 1 201 true 10"
         echo $command
-        bash $command
+        # bash $command
     fi   
 fi
 
