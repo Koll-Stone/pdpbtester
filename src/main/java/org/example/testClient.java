@@ -242,10 +242,10 @@ public class testClient {
                     result = validate(kMarketRequest);
                     if (ind%displayInterval==0)
                         System.out.println("client " + id +  " validate " + ind + " query, PDP server return: " + result);
-                    if (thelinkedpap!=null && id==1000+initId) {
-                        thelinkedpap.canSend();
-                        System.out.println("signaling my PAP!");
-                    }
+                    // if (thelinkedpap!=null && id==1000+initId) {
+                    //     thelinkedpap.canSend();
+                    //     System.out.println("signaling my PAP!");
+                    // }
                 } catch (IOException e) {
                     System.err.println("query tx wrong! ioexeception");
                 } catch (ClassNotFoundException e) {
