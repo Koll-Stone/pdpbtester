@@ -27,7 +27,7 @@ if [ $flag -eq 1 ]
 then
     if [ $me -le 3 ]
     then
-        command="runscripts/myrun.sh org.example.testserver $me true | tee result/serverlog.java"
+        command="runscripts/myrun.sh org.example.testserver $me true"
         echo $command
         bash $command
     else
