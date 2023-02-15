@@ -98,7 +98,7 @@ public class testClient {
         double averagelatency = computeAverage(finaldata, true);
 
 
-        System.out.println("All clients done. average latency is "+averagelatency + " ms");
+        System.out.println("All clients done. average latency is "+averagelatency / 1000000 + " ms");
         // System.out.println(Arrays.toString(latencyres.toArray()));
 
         exec.shutdown();
