@@ -91,15 +91,11 @@ public class testClient {
             for (long x: rtclients[i].getLatencydata().getValues())
                 latencyres.add(x);
         }
-
-        Collections.sort(latencyres);
-
-        long lasum = 0;
-        int limit = latencyres.size()/10;
-        for (int i=limit; i<latencyres.size()-limit; i++) {
-            lasum += latencyres.get(i);
+        long[] finaldata = new long[latencyres.size()];
+        for(int i=0; i<latencyres.size(); i++) {
+            finaldata[i] = latencyres.get(i);
         }
-        double averagelatency = 1.0 * lasum / (1000000 * (latencyres.size() - 2 * limit));
+        double averagelatency = computeAverage(finaldata, true);
 
 
         System.out.println("All clients done. average latency is "+averagelatency + " ms");
@@ -110,6 +106,21 @@ public class testClient {
 
     }
 
+    private static double computeAverage(long[] values, boolean percent) {
+        Arrays.sort(values);
+        int limit = 0;
+        if (percent) {
+            limit = values.length / 10;
+        }
+
+        long count = 0L;
+
+        for(int i = limit; i < values.length - limit; ++i) {
+            count += values[i];
+        }
+
+        return (double)count / (double)(values.length - 2 * limit);
+    }
 
 
 
@@ -358,6 +369,8 @@ public class testClient {
             return latencydata;
         }
     }
+
+
 
 
 }
