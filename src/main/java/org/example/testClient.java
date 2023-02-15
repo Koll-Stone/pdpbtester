@@ -103,7 +103,7 @@ public class testClient {
 
 
         System.out.println("All clients done. average latency is "+averagelatency + " ms");
-        System.out.println(Arrays.toString(latencyres.toArray()));
+        // System.out.println(Arrays.toString(latencyres.toArray()));
 
         exec.shutdown();
         System.out.println("All clients done.");
