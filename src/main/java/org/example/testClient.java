@@ -74,7 +74,7 @@ public class testClient {
             tasks.add(exec.submit(c));
         }
 
-        
+
         // wait for tasks completion
         for (Future<?> currTask : tasks) {
             try {
@@ -83,7 +83,7 @@ public class testClient {
                 ex.printStackTrace();
             }
         }
-        System.out.println("All clients done.");
+
 
 
         List<Long> latencyres = new ArrayList<Long>();
@@ -91,21 +91,22 @@ public class testClient {
             for (long x: rtclients[i].getLatencydata().getValues())
                 latencyres.add(x);
         }
+
         Collections.sort(latencyres);
 
-        long finalres = 0;
-        int start = latencyres.size()/10;
-        for (int i=start; i<latencyres.size()-start; i++) {
-            finalres += latencyres.get(i);
+        long lasum = 0;
+        int limit = latencyres.size()/10;
+        for (int i=limit; i<latencyres.size()-limit; i++) {
+            lasum += latencyres.get(i);
         }
-        double averagelatency = finalres / (1000000 *0.8 * latencyres.size());
+        double averagelatency = 1.0 * lasum / (1000000 * (latencyres.size() - 2 * limit));
 
 
-        exec.shutdown();
-
-        System.out.println("All clients done. average latency is "+averagelatency);
+        System.out.println("All clients done. average latency is "+averagelatency + " ms");
         System.out.println(Arrays.toString(latencyres.toArray()));
 
+        exec.shutdown();
+        System.out.println("All clients done.");
 
     }
 
