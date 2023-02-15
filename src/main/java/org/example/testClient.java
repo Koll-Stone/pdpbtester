@@ -70,6 +70,7 @@ public class testClient {
         }
 
         // wait for tasks completion
+
         for (Future<?> currTask : tasks) {
             try {
                 currTask.get();
@@ -78,9 +79,26 @@ public class testClient {
             }
         }
 
-        exec.shutdown();
 
-        System.out.println("All clients done.");
+
+        List<Long> latencyres = new ArrayList<Long>();
+        for (int i=0; i<threadNum; i++) {
+            for (long x: rtclients[i].getLatencydata().getValues())
+                latencyres.add(x);
+        }
+        Collections.sort(latencyres);
+
+        long finalres = 0;
+        int start = latencyres.size()/10;
+        for (int i=start; i<latencyres.size()-start; i++) {
+            finalres += latencyres.get(i);
+        }
+        double averagelatency = finalres / (0.8 * latencyres.size());
+
+
+        exec.shutdown();
+        
+        System.out.println("All clients done. average latency is "+averagelatency);
 
 
     }
@@ -92,11 +110,13 @@ public class testClient {
     static class RunnableTestClient extends Thread {
         int id;
         PrivateKey privateKey = null;
-//        int cmd;
+        //        int cmd;
         boolean signed;
         int numberOfOps;
 
         int displayInterval=10;
+
+        Storage latencydata;
 
         ServiceProxy clientProxy;
 
@@ -227,7 +247,7 @@ public class testClient {
 
             }
 
-            Storage st = new Storage(numberOfOps / 2);
+            latencydata = new Storage(numberOfOps / 2);
             System.out.println("start measuring...");
 
             for (; ind<numberOfOps; ind++) {
@@ -259,14 +279,14 @@ public class testClient {
                     ex.printStackTrace();
                 }
 
-                st.store(latency);
+                latencydata.store(latency);
             }
             if(id == (initId+1)*1000) {
-                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (-10%) = " + st.getAverage(true) / 1000 + " us ");
-                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (-10%) = " + st.getDP(true) / 1000 + " us ");
-                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (all samples) = " + st.getAverage(false) / 1000 + " us ");
-                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (all samples) = " + st.getDP(false) / 1000 + " us ");
-                System.out.println(this.id + " // Maximum time for " + numberOfOps / 2 + " executions (all samples) = " + st.getMax(false) / 1000 + " us ");
+                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (-10%) = " + latencydata.getAverage(true) / 1000 + " us ");
+                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (-10%) = " + latencydata.getDP(true) / 1000 + " us ");
+                System.out.println(this.id + " // Average time for " + numberOfOps / 2 + " executions (all samples) = " + latencydata.getAverage(false) / 1000 + " us ");
+                System.out.println(this.id + " // Standard desviation for " + numberOfOps / 2 + " executions (all samples) = " + latencydata.getDP(false) / 1000 + " us ");
+                System.out.println(this.id + " // Maximum time for " + numberOfOps / 2 + " executions (all samples) = " + latencydata.getMax(false) / 1000 + " us ");
             }
             System.out.println("test client " + id + ": all "+ numberOfOps + " query txs has been sent, end...");
 
@@ -326,7 +346,9 @@ public class testClient {
             return shortise(reply);
         }
 
-
+        public Storage getLatencydata() {
+            return latencydata;
+        }
     }
 
 
