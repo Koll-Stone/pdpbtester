@@ -42,11 +42,10 @@ public class testClient {
         int ite = Integer.parseInt(args[2]);
         boolean signed = Boolean.parseBoolean(args[3]);
         int intv = Integer.parseInt(args[4]);
+        String t = args[5];
 
-        RunnableTestClient rtpapclient = new RunnableTestClient(initId, ite, signed, intv);
-        System.out.println("Launching runnable newclient " + (initId));
+
         RunnableTestClient[] rtclients = new RunnableTestClient[threadNum];
-
         for (int i=0; i<threadNum; i++) {
 //            try {
 //                Thread.sleep(10);
@@ -54,23 +53,29 @@ public class testClient {
 //                ex.printStackTrace();
 //            }
             System.out.println("Launching runnable newclient " + ((initId+1)*1000+i));
-            rtclients[i] = new RunnableTestClient((initId+1)*1000+i, ite, signed, intv);
-            if (i==0) {
-                rtclients[i].setLinkedPAP(rtpapclient);
-            }
+            rtclients[i] = new RunnableTestClient((initId+1)*1000+i, ite, signed, intv, false);
         }
 
-
-        ExecutorService exec = Executors.newFixedThreadPool(rtclients.length+1);
+        ExecutorService exec=null;
         Collection<Future<?>> tasks = new LinkedList<>();
 
-        tasks.add(exec.submit(rtpapclient));
+
+        if (t.equals("readwrite")) {
+            RunnableTestClient rtpapclient = new RunnableTestClient(initId, ite, signed, intv, true);
+            System.out.println("Launching runnable newclient " + (initId));
+            rtclients[0].setLinkedPAP(rtpapclient);
+
+            exec = Executors.newFixedThreadPool(rtclients.length+1);
+            tasks.add(exec.submit(rtpapclient));
+        } else if (t.equals("read")) {
+            exec = Executors.newFixedThreadPool(rtclients.length);
+        }
         for (RunnableTestClient c : rtclients) {
             tasks.add(exec.submit(c));
         }
 
+        
         // wait for tasks completion
-
         for (Future<?> currTask : tasks) {
             try {
                 currTask.get();
@@ -82,7 +87,7 @@ public class testClient {
 
 
         List<Long> latencyres = new ArrayList<Long>();
-        for (int i=0; i<threadNum; i++) {
+        for (int i=1; i<threadNum; i++) { // skip the data from PAP client
             for (long x: rtclients[i].getLatencydata().getValues())
                 latencyres.add(x);
         }
@@ -97,7 +102,7 @@ public class testClient {
 
 
         exec.shutdown();
-        
+
         System.out.println("All clients done. average latency is "+averagelatency);
 
 
@@ -112,6 +117,7 @@ public class testClient {
         PrivateKey privateKey = null;
         //        int cmd;
         boolean signed;
+        boolean testwrite;
         int numberOfOps;
 
         int displayInterval=10;
@@ -124,12 +130,13 @@ public class testClient {
         private final Condition cansendnow = canSendLock.newCondition();
         RunnableTestClient thelinkedpap;
 
-        public RunnableTestClient(int id, int numberOfOps, boolean signed, int displayinterv) {
+        public RunnableTestClient(int id, int numberOfOps, boolean signed, int displayinterv, boolean testwrite) {
 
             this.id = id;
 //            this.cmd = cmd;
             this.numberOfOps = numberOfOps;
             this.signed = signed;
+            this.testwrite = testwrite;
             this.displayInterval = displayinterv;
             clientProxy = new ServiceProxy(id);
 //            System.out.println("timeout value is " + clientProxy.getInvokeTimeout());
@@ -218,7 +225,6 @@ public class testClient {
 
 
             int ind = 0;
-            boolean testwrite = false;
 
             String result;
 
