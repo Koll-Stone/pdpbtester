@@ -78,7 +78,7 @@ public class testClient {
                 ex.printStackTrace();
             }
         }
-
+        System.out.println("All clients done.");
 
 
         List<Long> latencyres = new ArrayList<Long>();
