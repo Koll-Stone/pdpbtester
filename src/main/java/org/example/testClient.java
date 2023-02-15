@@ -98,7 +98,7 @@ public class testClient {
         for (int i=start; i<latencyres.size()-start; i++) {
             finalres += latencyres.get(i);
         }
-        double averagelatency = finalres / (0.8 * latencyres.size());
+        double averagelatency = finalres / (1000000 *0.8 * latencyres.size());
 
 
         exec.shutdown();
