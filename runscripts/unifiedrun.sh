@@ -32,9 +32,9 @@ then
         echo $command
         bash $command
     else
-        client=$(($me-4))
+        client=$(($me-7))
         # start=$(($(($client*1000))+1001))
-        command="runscripts/myrun.sh org.example.testClient $client 120 501 true 100 read"
+        command="runscripts/myrun.sh org.example.testClient $client 300 201 true 100 read"
         echo $command
         bash $command
     fi   
