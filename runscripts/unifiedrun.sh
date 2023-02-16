@@ -34,7 +34,7 @@ then
     else
         client=$(($me-$servernum))
         # start=$(($(($client*1000))+1001))
-        command="runscripts/myrun.sh org.example.testClient $client 70 860 false 100 read"
+        command="runscripts/myrun.sh org.example.testClient $client 80 751 false 100 read"
         echo $command
         bash $command
     fi   
