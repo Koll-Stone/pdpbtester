@@ -17,11 +17,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.security.*;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,7 +44,7 @@ public class xacmlExecutor extends PExecutor {
     public POrder porder;
 
     public List<Document> checkpointheightPolicies = new ArrayList<Document>();
-    private Set<Integer> initialIds = new HashSet<Integer>();
+    private Set<Integer> currentheightIds = new TreeSet<Integer>();
     private Map<Integer, String> allPolicies = new HashMap<>();
     private Map<Integer, Set<Integer>> positiveUpdates = new HashMap<Integer, Set<Integer>>();
     private Map<Integer, Set<Integer>> negetiveUpdates = new HashMap<Integer, Set<Integer>>();
@@ -70,12 +67,12 @@ public class xacmlExecutor extends PExecutor {
 //        }
 
 
+
         balanaList = new Balana[nWorkers];
         pdpList = new PDP[nWorkers];
         upfmList = new updatablePolicyFinderModule[nWorkers];
         for (int i=0; i<nWorkers; i++) upfmList[i] = new updatablePolicyFinderModule();
         currentPDPHeight = 0;
-
 
         List<Integer> ResourceIds = new ArrayList<>();
         for (int i=0; i<RESOURCENUM; i++) {
@@ -83,6 +80,7 @@ public class xacmlExecutor extends PExecutor {
         }
         Random rnd = new Random(0);
         int policyIndex = 0;
+        int stateleng = 0;
         for (int i=0; i<USERNUM; i++) {
             for (int j=0; j<POLICYEACHUSER; j++) {
                 policyIndex++;
@@ -92,7 +90,10 @@ public class xacmlExecutor extends PExecutor {
                 int a3 = ResourceIds.get(2) % RESOURCENUM;
                 String kmarketPolicy = testDataBuilder.createKMarketPolicy(""+policyIndex,"user"+i, "resource"+a1,
                         "resource"+a2, "resource"+a3);
-                initialIds.add(policyIndex);
+//                System.out.println("kmarketpolicy length is "+ kmarketPolicy.length());
+                stateleng += kmarketPolicy.length();
+                currentheightIds.add(policyIndex);
+//                System.out.println("adding policy: policy length "+xx.toString().length()+"\n"+xx.toString());
                 checkpointheightPolicies.add(testDataBuilder.toDocument(kmarketPolicy));
                 allPolicies.put(policyIndex, kmarketPolicy);
             }
@@ -100,7 +101,13 @@ public class xacmlExecutor extends PExecutor {
 
         for (int i=0; i<nWorkers; i++) pdpList[i] = createThePDP(i);
 
-        System.out.println("xacmlExecutor initiazlize property successfully");
+        long start = System.currentTimeMillis();
+        byte[] snapshot = getSnapShot();
+        long duration = System.currentTimeMillis() - start;
+        System.out.println("snapshot costs "+duration+" ms, snapshot length is "+snapshot.length);
+
+//        System.out.println("xacmlExecutor initiazlize property successfully, policylength is"+stateleng+
+//                " snapshot is " + snapshot.toString().hashCode() + " snapshot length is "+snapshot.length);
     }
 
     public void setReplicaContext(ReplicaContext replicaContext) {this.replicaContext  = replicaContext;}
@@ -245,7 +252,7 @@ public class xacmlExecutor extends PExecutor {
                 int tind = (int) Thread.currentThread().getId() % nWorkers;
                 String result = pdpList[tind].evaluate(new String(queries[queryind])); // thread safe?
                 replies[queryind] = result.getBytes();
-                // System.out.println("thread " + tind + " finished validating 1 request, the result is: " + shortise(result));
+//                System.out.println("thread " + tind + " finished validating 1 request, the result is: " + shortise(result));
 
                 // verify signature
                 if (this.signed) {
@@ -257,7 +264,7 @@ public class xacmlExecutor extends PExecutor {
                             System.out.println("Client sent invalid signature!");
                             System.exit(0);
                         } else {
-                            // System.out.println("thread " + tind + " finished validating 1 request sig which is valid");
+//                            System.out.println("thread " + tind + " finished validating 1 request sig which is valid");
                         }
                     } catch (Exception e) {
                         System.out.println("error in validating query " + e);
@@ -279,14 +286,28 @@ public class xacmlExecutor extends PExecutor {
 
     @Override
     public byte[] getSnapShot() {
+
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-        for (Document policy: checkpointheightPolicies) {
+        for (int x: currentheightIds) {
             try {
-                outputStream.write(policy.toString().getBytes());
+//                System.out.println("snapshot: writing policy length "+ allPolicies.get(x).getBytes().length);
+                outputStream.write(allPolicies.get(x).getBytes());
             } catch (IOException e) {
                 System.out.println("write state log wrong " + e);
             }
         }
+
+
+
+//        for (Document policy: checkpointheightPolicies) {
+//            try {
+//                System.out.println("snapshot: writing policy length "+ policy.toString().length());
+//                outputStream.write(policy.toString().getBytes());
+//            } catch (IOException e) {
+//                System.out.println("write state log wrong " + e);
+//            }
+//        }
         return outputStream.toByteArray();
     }
 
@@ -322,14 +343,13 @@ public class xacmlExecutor extends PExecutor {
 //    }
 
     public PDP createThePDP(int ind) {
-        System.out.println("craete the pdp");
+        System.out.println("create the pdp");
         Balana balana = Balana.getInstance();
         Set<PolicyFinderModule> set1 = new HashSet<>();
         set1.add(upfmList[ind]);
         balana.getPdpConfig().getPolicyFinder().setModules(set1);
         PDP pdp = new PDP(new PDPConfig(null, balana.getPdpConfig().getPolicyFinder(), null, true));
         upfmList[ind].loadPolicyBatchFromMemory(checkpointheightPolicies);
-        System.out.println("PDP "+ind+" has "+upfmList[ind].showPolicies().size()+" policies");
         return pdp;
     }
 
@@ -343,12 +363,14 @@ public class xacmlExecutor extends PExecutor {
         for (int i=0; i<nWorkers; i++) {
             for (Integer x: idstodelete) {
                 upfmList[i].deletePolicy(new URI(x.toString()));
+                currentheightIds.remove(x);
             }
         }
 
         List<Document> newpolicies = new ArrayList<Document>();
         for (Integer x: idstoadd) {
             newpolicies.add(testDataBuilder.toDocument(allPolicies.get(x)));
+            currentheightIds.add(x);
         }
 
         if (newpolicies.size()>0) {
