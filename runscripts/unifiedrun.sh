@@ -36,7 +36,7 @@ then
         papnum=0
         if [ $client -eq 0 ]
         then
-            papnum=25
+            papnum=30
         fi
         command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 150 400 true 100"
     fi   
