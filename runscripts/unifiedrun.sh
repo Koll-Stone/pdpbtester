@@ -28,7 +28,7 @@ if [ $flag -eq 1 ]
 then
     if [ $me -le $(($servernum-1)) ]
     then
-        command="runscripts/myrun.sh org.example.testserver $me true"
+        command="runscripts/myrun.sh org.example.testserver $me true | tee serverlog.txt"
     else
         client=$(($me-$servernum))
         echo "client is $client"
