@@ -1,6 +1,5 @@
 package org.example;
 
-
 import bftsmart.tom.ServiceReplica;
 import bftsmart.tom.server.PDPB.POrder;
 
@@ -8,15 +7,16 @@ public class testserver extends POrder {
     public testserver(int id, boolean signed) {
         xacmlExecutor xexecutor = new xacmlExecutor(signed);
 
-        System.out.println("created xacml executor");
+        System.out.println("created xacml executor "+id);
 
         setReplicaId(id);
         SetPExecutor(xexecutor);
+        setSysStartTime(System.currentTimeMillis());
         xexecutor.setPOrder(this);
 
         ServiceReplica sr = new ServiceReplica(id, this, this);
         xexecutor.setReplicaContext(sr.getReplicaContext());
-        
+
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -24,6 +24,9 @@ public class testserver extends POrder {
         }
         setPDPBState(sr.getTomLayer().pdpbstate);
         setEchomanger(sr.getTomLayer().echoManager);
+
+
+
     }
 
     public static void main(String[] args) {

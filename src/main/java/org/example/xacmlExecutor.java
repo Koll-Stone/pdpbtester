@@ -37,7 +37,7 @@ public class xacmlExecutor extends PExecutor {
     private updatablePolicyFinderModule[] upfmList;
 
 
-//    int nWorkers = Runtime.getRuntime().availableProcessors();
+    //    int nWorkers = Runtime.getRuntime().availableProcessors();
     int nWorkers = 2;
     private final ExecutorService parallelVerifier = Executors.newWorkStealingPool(nWorkers);
 
@@ -53,7 +53,9 @@ public class xacmlExecutor extends PExecutor {
 
     PublicKey publicKey=null;
 
+
     public xacmlExecutor(boolean signed) {
+
         System.out.println("initialize xacmlExecutor");
         initProperty();
 
@@ -141,9 +143,9 @@ public class xacmlExecutor extends PExecutor {
         byte[] reply = null;
         String content = null;
         try (ByteArrayInputStream byteIn = new ByteArrayInputStream(tx);
-            ObjectInput objIn = new ObjectInputStream(byteIn);
-            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-            ObjectOutput objOut = new ObjectOutputStream(byteOut);) {
+             ObjectInput objIn = new ObjectInputStream(byteIn);
+             ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+             ObjectOutput objOut = new ObjectOutputStream(byteOut);) {
             int command = objIn.readInt();
             int policyid = objIn.readInt();
             content = (String)objIn.readObject();
@@ -160,16 +162,20 @@ public class xacmlExecutor extends PExecutor {
 //            }
             if (command==0) {
                 // do nothing
-                objOut.writeObject("noop policy update finished");
+                objOut.writeObject("noop policy heartbeat finished");
             } else if (command==1) {
+//                System.out.println("add a new policy: "+policyid);
                 if (!positiveUpdates.containsKey(h)) positiveUpdates.put(h, new HashSet<Integer>());
                 positiveUpdates.get(h).add(policyid);
                 allPolicies.put(policyid, content);
+                objOut.writeObject("add policy with id "+policyid+"! operation finished");
             } else if (command==2) {
+//                System.out.println("remove an exising policy: "+policyid);
                 if (!negetiveUpdates.containsKey(h)) negetiveUpdates.put(h, new HashSet<Integer>());
                 negetiveUpdates.get(h).add(policyid);
+                objOut.writeObject("remove policy with id "+policyid+"! operation finished");
             } else {
-                System.out.println("****wrong**** it should be noop update!");
+                System.out.println("****wrong**** don't know the update command!");
             }
             objOut.flush();
             byteOut.flush();
@@ -298,6 +304,8 @@ public class xacmlExecutor extends PExecutor {
             }
         }
 
+        // todo, garbage collect positveupdate/negativeupdate
+
 
 
 //        for (Document policy: checkpointheightPolicies) {
@@ -362,7 +370,9 @@ public class xacmlExecutor extends PExecutor {
         long start = System.currentTimeMillis();
         for (int i=0; i<nWorkers; i++) {
             for (Integer x: idstodelete) {
-                upfmList[i].deletePolicy(new URI(x.toString()));
+                String s = "KmarketPolicy" + x;
+                upfmList[i].deletePolicy(new URI(s));
+//                System.out.println("changing PDP: remove policy with id "+x);
                 currentheightIds.remove(x);
             }
         }
@@ -376,13 +386,17 @@ public class xacmlExecutor extends PExecutor {
         if (newpolicies.size()>0) {
             for (int i=0; i<nWorkers; i++) {
                 upfmList[i].loadPolicyBatchFromMemory(newpolicies);
-                System.out.println("pdp now has " + upfmList[i].showPolicies() + " policies");
+//                System.out.println("pdp now has " + upfmList[i].showPolicies().size() + " policies");
             }
         }
 
-//        long duration = System.currentTimeMillis() - start;
-//        if (action=="revoke" || newhead-currentPDPHeight>=5) System.out.println("need " + action + " PDP from "+currentPDPHeight+ " to " + newhead +
-//                ", time costs " + duration + " ms");
+
+        long duration = System.currentTimeMillis() - start;
+        if (action=="revoke" || newhead-currentPDPHeight>=2)
+        System.out.println("need " + action + " PDP from "+currentPDPHeight+ " to " + newhead +
+                ", time costs " + duration + " ms, pdp now has " + upfmList[0].showPolicies().size() + " policies");
+        if (newhead%100==0)
+            System.out.println("pdp at height "+newhead+ " now has " + upfmList[0].showPolicies().size() + " policies");
 
         currentPDPHeight = newhead;
 

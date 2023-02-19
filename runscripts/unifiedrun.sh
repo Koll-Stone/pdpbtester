@@ -29,13 +29,17 @@ then
     if [ $me -le $(($servernum-1)) ]
     then
         command="runscripts/myrun.sh org.example.testserver $me true"
-        echo $command
-        bash $command
     else
         client=$(($me-$servernum))
-        # start=$(($(($client*1000))+1001))
-        command="runscripts/myrun.sh org.example.testClient $client 300 200 true 100 read"
-        echo $command
-        bash $command
+        echo "client is $client"
+        pepinitid=$((($client+1)*1000))
+        papnum=0
+        if [ $client -eq 0 ]
+        then
+            papnum=5
+        fi
+        command="bash runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 100 10 true 20"
     fi   
+    echo $command
+    # bash $command
 fi
