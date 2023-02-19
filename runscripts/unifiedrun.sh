@@ -28,7 +28,7 @@ if [ $flag -eq 1 ]
 then
     if [ $me -le $(($servernum-1)) ]
     then
-        command="runscripts/myrun.sh org.example.testserver $me true | tee -a serverlog.txt"
+        command="runscripts/myrun.sh org.example.testserver $me true | tee serverlog.txt"
     else
         client=$(($me-$servernum))
         echo "client is $client"
@@ -38,7 +38,7 @@ then
         then
             papnum=20
         fi
-        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 200 10000 true 100"
+        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 200 6000 true 100"
     fi   
     echo $command
     bash $command
