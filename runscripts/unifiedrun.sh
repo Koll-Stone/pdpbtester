@@ -38,7 +38,7 @@ then
         # then
         #     papnum=20
         # fi
-        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 180 350 true 100"
+        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 200 320 true 100"
     fi   
     echo $command
     bash $command
