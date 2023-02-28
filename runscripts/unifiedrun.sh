@@ -21,7 +21,7 @@ while read line; do
     ((ind++))
 done < $input
 
-servernum=4
+servernum=5
 
 
 if [ $flag -eq 1 ]
@@ -41,5 +41,5 @@ then
         command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 200 6000 true 100"
     fi   
     echo $command
-    bash $command
+    # bash $command
 fi
