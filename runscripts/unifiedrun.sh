@@ -38,7 +38,14 @@ then
         # then
         #     papnum=20
         # fi
-        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 220 400 true 100"
+        
+        opnum=400
+        if [ $client -eq 0 ]
+        then
+            opnum=300
+        fi
+
+        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 220 $opnum true 100"
     fi   
     echo $command
     bash $command
