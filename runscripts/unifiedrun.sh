@@ -34,12 +34,12 @@ then
         echo "client is $client"
         pepinitid=$((($client+1)*1000))
         papnum=0
-        if [ $client -eq 0 ]
-        then
-            papnum=20
-        fi
+        # if [ $client -eq 0 ]
+        # then
+        #     papnum=20
+        # fi
         command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 200 6000 true 100"
     fi   
     echo $command
-    # bash $command
+    bash $command
 fi
