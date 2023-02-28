@@ -42,10 +42,10 @@ then
         opnum=400
         if [ $client -eq 0 ]
         then
-            opnum=300
+            opnum=200
         fi
 
-        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 200 $opnum true 100"
+        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 300 $opnum true 100"
     fi   
     echo $command
     bash $command
