@@ -45,7 +45,7 @@ then
             opnum=400
         fi
 
-        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 350 $opnum true 100"
+        command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 320 $opnum true 100"
     fi   
     echo $command
     bash $command
