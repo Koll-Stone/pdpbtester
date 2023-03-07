@@ -42,7 +42,7 @@ then
         opnum=410
         if [ $client -eq 0 ]
         then
-            opnum=200
+            opnum=400
         fi
 
         command="runscripts/myrun.sh org.example.testClient 0 $papnum $pepinitid 300 $opnum true 100"
